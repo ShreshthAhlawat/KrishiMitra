@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | KrishiMitra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .brand-font { font-family: 'Rozha One', serif; }
+        body { 
+            background-color: #1A3C34; 
+            font-family: 'Inter', sans-serif;
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/leaf.png');
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-md p-10 login-card rounded-[40px] shadow-2xl transition-all hover:border-white/20">
+        <a href="index.html" class="inline-flex items-center text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-[#D4FF00] transition mb-8 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Home
+        </a>
+
+        <div class="text-center mb-10">
+            <h2 class="text-4xl brand-font text-[#D4FF00] mb-2">Welcome Back</h2>
+            <p class="text-white/50 text-xs tracking-wide">Enter your credentials to access your farm dashboard.</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 ml-1">Email Address</label>
+                <input type="email" id="email" placeholder="farmer@krishimitra.com" 
+                    class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-[#D4FF00] focus:bg-white/10 transition-all text-sm" required>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 ml-1">Password</label>
+                <input type="password" id="password" placeholder="••••••••" 
+                    class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-[#D4FF00] focus:bg-white/10 transition-all text-sm" required>
+            </div>
+
+            <button type="submit" id="loginBtn" 
+                class="w-full bg-[#D4FF00] text-[#1A3C34] font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-[#D4FF00]/10 mt-4">
+                LOG IN TO DASHBOARD
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-xs text-white/40">
+                New to the platform? 
+                <a href="registration.html" class="text-[#D4FF00] hover:underline font-bold ml-1">Create Account</a>
+            </p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Your Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlEvNMDm19GSImYgL8OK3cPuhaaA5KL64",
+            authDomain: "krishi-mitra-59266.firebaseapp.com",
+            projectId: "krishi-mitra-59266",
+            storageBucket: "krishi-mitra-59266.firebasestorage.app",
+            messagingSenderId: "202016939261",
+            appId: "1:202016939261:web:88aae143cecedef1b6b294"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const form = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Visual feedback for the user
+            loginBtn.innerText = "VERIFYING...";
+            loginBtn.disabled = true;
+            loginBtn.style.opacity = "0.7";
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Success! Go to Dashboard
+                    window.location.href = "dashboard.html"; 
+                })
+                .catch((error) => {
+                    // Reset button if there is an error
+                    loginBtn.innerText = "LOG IN TO DASHBOARD";
+                    loginBtn.disabled = false;
+                    loginBtn.style.opacity = "1";
+
+                    let errorMessage = "Login failed. Please check your credentials.";
+                    
+                    // Handle specific Firebase errors
+                    if (error.code === 'auth/invalid-credential') {
+                        errorMessage = "Incorrect email or password.";
+                    } else if (error.code === 'auth/user-not-found') {
+                        errorMessage = "No account exists with this email.";
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = "Wrong password. Try again.";
+                    }
+                    
+                    alert("⚠️ " + errorMessage);
+                });
+        });
+    </script>
+</body>
+</html>

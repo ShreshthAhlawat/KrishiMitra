@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | KrishiMitra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #F0F2F5; font-family: 'Inter', sans-serif; color: #1A3C34; }
+        .chat-bubble-bot { background: #1A3C34; color: #D4FF00; border-radius: 20px 20px 20px 0; }
+        .chat-bubble-user { background: #D4FF00; color: #1A3C34; border-radius: 20px 20px 0 20px; }
+        .sidebar { width: 80px; background: #1A3C34; height: 100vh; position: fixed; left: 0; top: 0; }
+    </style>
+</head>
+<body class="flex">
+
+    <nav class="sidebar flex flex-col items-center py-10 gap-8">
+        <a href="dashboard.html" class="text-2xl">🏠</a>
+        <a href="pest.html" class="text-2xl">🔍</a>
+        <div class="w-10 h-10 bg-[#D4FF00] rounded-full flex items-center justify-center font-bold">AI</div>
+    </nav>
+
+    <main class="flex-1 ml-[80px] h-screen flex flex-col">
+        <header class="p-6 bg-white border-b flex justify-between items-center">
+            <h1 class="font-black uppercase tracking-widest text-xs">KrishiMitra Virtual Assistant</h1>
+            <span class="text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">● ONLINE</span>
+        </header>
+
+        <div id="chat-box" class="flex-1 overflow-y-auto p-10 space-y-6">
+            <div class="flex flex-col items-start">
+                <div class="chat-bubble-bot p-4 max-w-md shadow-lg text-sm">
+                    Hello! I am your AI farming assistant. You can ask me about crop diseases, weather, or irrigation schedules. How can I help?
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 bg-white border-t">
+            <div class="max-w-4xl mx-auto flex gap-4">
+                <input id="user-input" type="text" placeholder="Type your farming question..." class="flex-1 bg-gray-100 border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-[#1A3C34] outline-none">
+                <button onclick="sendMessage()" class="bg-[#1A3C34] text-[#D4FF00] px-8 rounded-2xl font-black text-xs uppercase tracking-widest">Send</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            
+            if (input.value.trim() === "") return;
+
+            // Add User Message
+            chatBox.innerHTML += `
+                <div class="flex flex-col items-end">
+                    <div class="chat-bubble-user p-4 max-w-md shadow-md text-sm font-bold">
+                        ${input.value}
+                    </div>
+                </div>
+            `;
+
+            // Simple "AI" Response Logic
+            setTimeout(() => {
+                let response = "That's an interesting question. Let me check the agricultural database for you.";
+                if(input.value.toLowerCase().includes("wheat")) response = "Wheat requires cool weather and moist soil during the heading stage.";
+                
+                chatBox.innerHTML += `
+                    <div class="flex flex-col items-start mt-4">
+                        <div class="chat-bubble-bot p-4 max-w-md shadow-lg text-sm italic">
+                            ${response}
+                        </div>
+                    </div>
+                `;
+                chatBox.scrollTop = chatBox.scrollHeight;
+                speak(response);
+            }, 1000);
+
+            input.value = "";
+        }
+
+        function speak(text) {
+            const synth = window.speechSynthesis;
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.rate = 1;
+            synth.speak(utter);
+        }
+    </script>
+</body>
+</html>

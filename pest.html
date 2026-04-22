@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pest Diagnosis | KrishiMitra AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <style>
+        .brand-font { font-family: 'Rozha One', serif; }
+        body { background-color: #F9F8F4; font-family: 'Inter', sans-serif; color: #1A3C34; }
+        canvas, #image-preview { border-radius: 30px; width: 100% !important; height: auto !important; border: 6px solid #1A3C34; }
+        .tab-btn.active { background-color: #1A3C34; color: #D4FF00; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-12">
+            <a href="dashboard.html" class="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition">← Dashboard</a>
+            <div class="brand-font text-2xl">KRISHI<span class="text-[#D4FF00] bg-[#1A3C34] px-2 rounded ml-1">AI</span></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+            <div class="space-y-6">
+                <div class="flex bg-white p-2 rounded-2xl shadow-sm border border-black/5">
+                    <button onclick="switchMode('webcam')" id="webcamTab" class="tab-btn active flex-1 py-3 rounded-xl font-bold text-xs transition">LIVE WEBCAM</button>
+                    <button onclick="switchMode('upload')" id="uploadTab" class="tab-btn flex-1 py-3 rounded-xl font-bold text-xs transition">UPLOAD PHOTO</button>
+                </div>
+
+                <div class="bg-white p-4 rounded-[50px] shadow-sm border border-black/5">
+                    <div id="webcam-mode">
+                        <div id="webcam-container" class="mb-4">
+                            <div class="aspect-square bg-gray-50 rounded-[40px] flex items-center justify-center border-4 border-dashed border-gray-200 text-gray-400 text-[10px] font-bold uppercase">Webcam Feed</div>
+                        </div>
+                        <button onclick="initWebcam()" id="startBtn" class="w-full bg-[#1A3C34] text-[#D4FF00] font-black py-5 rounded-[30px] hover:scale-[1.02] transition-all shadow-xl shadow-[#1A3C34]/10">ACTIVATE CAMERA</button>
+                    </div>
+
+                    <div id="upload-mode" class="hidden">
+                        <div id="upload-container" class="mb-4">
+                            <img id="image-preview" src="#" alt="your image" class="hidden aspect-square object-cover" />
+                            <div id="upload-placeholder" class="aspect-square bg-gray-50 rounded-[40px] flex items-center justify-center border-4 border-dashed border-gray-200 text-gray-400 text-[10px] font-bold uppercase">No Image Selected</div>
+                        </div>
+                        <input type="file" id="image-input" accept="image/*" class="hidden" onchange="handleUpload(this)">
+                        <button onclick="document.getElementById('image-input').click()" class="w-full bg-[#1A3C34] text-[#D4FF00] font-black py-5 rounded-[30px] hover:scale-[1.02] transition-all">CHOOSE IMAGE</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <h1 class="text-5xl brand-font text-[#1A3C34]">AI <span class="italic underline decoration-[#D4FF00]">Analysis</span></h1>
+                <div id="label-container" class="bg-white p-8 rounded-[40px] shadow-sm space-y-6">
+                    <div class="text-gray-300 italic text-sm">Waiting for input...</div>
+                </div>
+                <div id="remedy-box" class="hidden p-8 rounded-[40px] border-l-[12px] transition-all duration-500">
+                    <p id="remedy-text" class="font-bold text-[#1A3C34] text-lg"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // PASTE YOUR TEACHABLE MACHINE LINK HERE
+        const URL = "https://teachablemachine.withgoogle.com/models/c5aokYWqS/"; 
+
+        let model, webcam, labelContainer, maxPredictions, isWebcam = true;
+
+        // LOAD MODEL IMMEDIATELY
+        async function loadModel() {
+            model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+            maxPredictions = model.getTotalClasses();
+            labelContainer = document.getElementById("label-container");
+        }
+        loadModel();
+
+        function switchMode(mode) {
+            isWebcam = (mode === 'webcam');
+            document.getElementById('webcam-mode').classList.toggle('hidden', !isWebcam);
+            document.getElementById('upload-mode').classList.toggle('hidden', isWebcam);
+            document.getElementById('webcamTab').classList.toggle('active', isWebcam);
+            document.getElementById('uploadTab').classList.toggle('active', !isWebcam);
+            if (webcam) webcam.stop();
+        }
+
+        async function initWebcam() {
+            const startBtn = document.getElementById('startBtn');
+            startBtn.innerText = "OPENING...";
+            try {
+                webcam = new tmImage.Webcam(400, 400, true);
+                await webcam.setup();
+                await webcam.play();
+                window.requestAnimationFrame(webcamLoop);
+                document.getElementById("webcam-container").innerHTML = "";
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                labelContainer.innerHTML = "";
+                for (let i = 0; i < maxPredictions; i++) labelContainer.appendChild(document.createElement("div"));
+                startBtn.style.display = "none";
+            } catch (err) { alert("Camera Error: Check Permissions"); }
+        }
+
+        async function webcamLoop() {
+            if (isWebcam) {
+                webcam.update();
+                await predict(webcam.canvas);
+                window.requestAnimationFrame(webcamLoop);
+            }
+        }
+
+        async function handleUpload(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    const img = document.getElementById('image-preview');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    
+                    labelContainer.innerHTML = "";
+                    for (let i = 0; i < maxPredictions; i++) labelContainer.appendChild(document.createElement("div"));
+                    
+                    // Wait for image to load before predicting
+                    img.onload = async () => await predict(img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function predict(imageElement) {
+            const prediction = await model.predict(imageElement);
+            const remedyBox = document.getElementById('remedy-box');
+            const remedyText = document.getElementById('remedy-text');
+
+            for (let i = 0; i < maxPredictions; i++) {
+                const prob = prediction[i].probability;
+                const percent = (prob * 100).toFixed(0);
+                labelContainer.childNodes[i].innerHTML = `
+                    <div class="flex justify-between font-bold text-xs uppercase"><span>${prediction[i].className}</span><span>${percent}%</span></div>
+                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden mt-2"><div class="bg-[#1A3C34] h-full" style="width: ${percent}%"></div></div>`;
+
+                if (prob > 0.80) {
+                    remedyBox.classList.remove('hidden');
+                    if (prediction[i].className === "Infected") {
+                        remedyBox.style.backgroundColor = "#FFEBEB"; remedyBox.style.borderColor = "#FF4B4B";
+                        remedyText.innerHTML = "Infection Detected! ⚠️<br><span class='text-sm font-normal'>Remove affected leaves and apply organic Neem oil.</span>";
+                    } else if (prediction[i].className === "Healthy") {
+                        remedyBox.style.backgroundColor = "#D4FF00"; remedyBox.style.borderColor = "#1A3C34";
+                        remedyText.innerHTML = "Plant is Healthy! ✨<br><span class='text-sm font-normal'>Everything looks optimal.</span>";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

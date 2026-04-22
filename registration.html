@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | KrishiMitra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        .brand-font { font-family: 'Rozha One', serif; }
+        body { 
+            background-color: #1A3C34; 
+            font-family: 'Inter', sans-serif;
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/leaf.png');
+        }
+        .register-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="w-full max-w-md p-10 register-card rounded-[40px] shadow-2xl transition-all hover:border-white/20">
+        <a href="index.html" class="inline-flex items-center text-[10px] uppercase tracking-[0.2em] text-white/40 hover:text-[#D4FF00] transition mb-8 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Home
+        </a>
+
+        <div class="text-center mb-8">
+            <h2 class="text-4xl brand-font text-[#D4FF00] mb-2">Create Account</h2>
+            <p class="text-white/50 text-xs tracking-wide">Join the digital farming revolution today.</p>
+        </div>
+
+        <form id="registerForm" class="space-y-5">
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 ml-1">Full Name</label>
+                <input type="text" id="username" placeholder="Arjun Singh" 
+                    class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-[#D4FF00] focus:bg-white/10 transition-all text-sm" required>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 ml-1">Email Address</label>
+                <input type="email" id="email" placeholder="email@example.com" 
+                    class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-[#D4FF00] focus:bg-white/10 transition-all text-sm" required>
+            </div>
+
+            <div>
+                <label class="block text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 ml-1">Password</label>
+                <input type="password" id="password" placeholder="••••••••" 
+                    class="w-full p-4 rounded-2xl bg-white/5 border border-white/10 focus:outline-none focus:border-[#D4FF00] focus:bg-white/10 transition-all text-sm" required>
+            </div>
+
+            <button type="submit" id="regBtn" 
+                class="w-full bg-[#D4FF00] text-[#1A3C34] font-black py-4 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-[#D4FF00]/10 mt-4">
+                SIGN UP
+            </button>
+        </form>
+
+        <p class="mt-8 text-center text-xs text-white/40">
+            Already have an account? 
+            <a href="login.html" class="text-[#D4FF00] hover:underline font-bold ml-1">Login</a>
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBlEvNMDm19GSImYgL8OK3cPuhaaA5KL64",
+            authDomain: "krishi-mitra-59266.firebaseapp.com",
+            projectId: "krishi-mitra-59266",
+            storageBucket: "krishi-mitra-59266.firebasestorage.app",
+            messagingSenderId: "202016939261",
+            appId: "1:202016939261:web:88aae143cecedef1b6b294"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const form = document.getElementById('registerForm');
+        const regBtn = document.getElementById('regBtn');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            regBtn.innerText = "CREATING ACCOUNT...";
+            regBtn.disabled = true;
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Save the username to the profile
+                    return updateProfile(userCredential.user, {
+                        displayName: username
+                    });
+                })
+                .then(() => {
+                    // REDIRECT TO DASHBOARD
+                    window.location.href = "dashboard.html"; 
+                })
+                .catch((error) => {
+                    regBtn.innerText = "SIGN UP";
+                    regBtn.disabled = false;
+                    
+                    let msg = error.message;
+                    if(error.code === 'auth/email-already-in-use') msg = "This email is already registered.";
+                    if(error.code === 'auth/weak-password') msg = "Password should be at least 6 characters.";
+                    
+                    alert("Error: " + msg);
+                });
+        });
+    </script>
+</body>
+</html>

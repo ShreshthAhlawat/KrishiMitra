@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KrishiMitra | Smart Farming Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Rozha+One&display=swap');
+        
+        :root { --primary: #1A3C34; --accent: #D4FF00; }
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; background: #F9F8F4; overflow-x: hidden; }
+        .brand-font { font-family: 'Rozha One', serif; }
+        .glass { background: rgba(26, 60, 52, 0.85); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        /* Animated Percentage Circles */
+        .circle-container { position: relative; width: 120px; height: 120px; }
+        circle { fill: none; stroke-width: 8; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 2s ease-out; }
+        .bg-circle { stroke: rgba(255,255,255,0.1); }
+        .progress-circle { stroke: var(--accent); stroke-dasharray: 314; stroke-dashoffset: 314; }
+
+        /* Review Carousel */
+        .carousel-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 20px; padding: 20px 0; scrollbar-width: none; }
+        .carousel-container::-webkit-scrollbar { display: none; }
+        .carousel-item { flex: 0 0 320px; scroll-snap-align: start; }
+        
+        #map { height: 500px; border-radius: 40px; z-index: 1; }
+    </style>
+</head>
+<body>
+
+    <nav class="fixed w-full z-[100] px-8 py-4 flex justify-between items-center glass text-white">
+        <div class="text-2xl brand-font tracking-tight">KRISHI<span class="text-[#D4FF00]">MITRA</span></div>
+        
+        <div class="hidden lg:flex space-x-10 font-medium uppercase text-[10px] tracking-[0.2em]">
+            <a href="#home" class="hover:text-[#D4FF00] transition">Home</a>
+            <a href="#problem" class="hover:text-[#D4FF00] transition">Mission</a>
+            <a href="#insights" class="hover:text-[#D4FF00] transition">Insights</a>
+            <a href="#features" class="hover:text-[#D4FF00] transition">Features</a>
+            <a href="#reviews" class="hover:text-[#D4FF00] transition">Reviews</a>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button onclick="window.location.href='login.html'" class="text-xs font-bold hover:text-[#D4FF00] transition">LOG IN</button>
+            <button onclick="window.location.href='registration.html'" class="bg-[#D4FF00] text-[#1A3C34] px-6 py-2.5 rounded-full font-black text-xs hover:scale-105 transition shadow-lg shadow-[#D4FF00]/20">
+                GET STARTED
+            </button>
+        </div>
+    </nav>
+
+    <section id="home" class="relative h-screen flex items-center justify-center overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80" class="absolute inset-0 w-full h-full object-cover" alt="Green Field">
+        <div class="absolute inset-0 bg-black/60"></div>
+        <div class="relative z-10 text-center px-6" data-aos="zoom-out">
+            <span class="text-[#D4FF00] font-bold tracking-[0.4em] uppercase text-xs mb-4 block">The Future of Indian Farming</span>
+            <h1 class="text-6xl md:text-8xl brand-font text-white mb-6">Harvesting <br><span class="text-[#D4FF00]">Intelligence.</span></h1>
+            <p class="text-white/70 max-w-2xl mx-auto text-lg mb-10 font-light">Solving agricultural challenges with AI-driven insights and sustainable waste management.</p>
+        </div>
+    </section>
+
+    <section id="problem" class="py-24 px-8 bg-white">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div data-aos="fade-right">
+                <span class="font-bold tracking-widest uppercase text-xs text-red-500 italic">The Problem Statement</span>
+                <h2 class="text-5xl brand-font text-[#1A3C34] mt-4 mb-6">Agriculture Faces <br>Modern Hurdles</h2>
+                <div class="space-y-6 text-gray-600">
+                    <p class="flex items-start"><span class="text-red-500 mr-3">●</span> Unpredictable weather and improper irrigation leading to crop failure.</p>
+                    <p class="flex items-start"><span class="text-red-500 mr-3">●</span> Undiagnosed pest attacks causing massive financial losses.</p>
+                    <p class="flex items-start"><span class="text-red-500 mr-3">●</span> Agricultural waste (stubble/dung) causing pollution instead of income.</p>
+                </div>
+            </div>
+            <div class="bg-[#1A3C34] p-12 rounded-[40px] text-white shadow-2xl" data-aos="fade-left">
+                <h3 class="text-3xl brand-font mb-6 text-[#D4FF00]">The Solution</h3>
+                <p class="text-white/70 leading-relaxed mb-6">KrishiMitra provides an integrated digital platform combining guidance, technology, and marketplace support.</p>
+                <ul class="text-sm space-y-3 text-[#D4FF00]/80">
+                    <li>✓ Real-time Weather Guidance</li>
+                    <li>✓ AI Pest Identification</li>
+                    <li>✓ Waste-to-Wealth Marketplace</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="insights" class="py-24 bg-[#1A3C34] text-white">
+        <div class="max-w-7xl mx-auto px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-5xl brand-font">Impact <span class="text-[#D4FF00]">Analytics</span></h2>
+                <p class="text-white/40 mt-4">Projected success rates based on platform implementation.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="flex flex-col items-center" data-aos="fade-up">
+                    <div class="circle-container">
+                        <svg width="120" height="120"><circle class="bg-circle" cx="60" cy="60" r="50"></circle><circle class="progress-circle" id="circle1" cx="60" cy="60" r="50"></circle></svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">92%</div>
+                    </div>
+                    <p class="mt-4 text-[10px] tracking-widest uppercase opacity-50">Pest Diagnosis</p>
+                </div>
+                <div class="flex flex-col items-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="circle-container">
+                        <svg width="120" height="120"><circle class="bg-circle" cx="60" cy="60" r="50"></circle><circle class="progress-circle" id="circle2" cx="60" cy="60" r="50"></circle></svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">88%</div>
+                    </div>
+                    <p class="mt-4 text-[10px] tracking-widest uppercase opacity-50">Waste Recovery</p>
+                </div>
+                <div class="flex flex-col items-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circle-container">
+                        <svg width="120" height="120"><circle class="bg-circle" cx="60" cy="60" r="50"></circle><circle class="progress-circle" id="circle3" cx="60" cy="60" r="50"></circle></svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">75%</div>
+                    </div>
+                    <p class="mt-4 text-[10px] tracking-widest uppercase opacity-50">Resource Saving</p>
+                </div>
+                <div class="flex flex-col items-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="circle-container">
+                        <svg width="120" height="120"><circle class="bg-circle" cx="60" cy="60" r="50"></circle><circle class="progress-circle" id="circle4" cx="60" cy="60" r="50"></circle></svg>
+                        <div class="absolute inset-0 flex items-center justify-center font-bold text-xl">98%</div>
+                    </div>
+                    <p class="mt-4 text-[10px] tracking-widest uppercase opacity-50">Ease of Use</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 px-8 bg-[#F9F8F4]">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-5xl brand-font text-[#1A3C34] mb-16 text-center">Platform <span class="text-[#D4FF00]">Features</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-10 rounded-[40px] shadow-sm hover:shadow-xl transition-all" data-aos="fade-up">
+                    <div class="text-[#D4FF00] mb-4 text-4xl">🌤️</div>
+                    <h3 class="text-xl font-bold mb-3">Smart Assistant</h3>
+                    <p class="text-sm text-gray-500">Weather-based irrigation and crop selection guidance.</p>
+                </div>
+                <div class="bg-white p-10 rounded-[40px] shadow-sm hover:shadow-xl transition-all" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-[#D4FF00] mb-4 text-4xl">🔍</div>
+                    <h3 class="text-xl font-bold mb-3">Pest Identification</h3>
+                    <p class="text-sm text-gray-500">Teachable Machine AI model for instant disease diagnosis.</p>
+                </div>
+                <div class="bg-white p-10 rounded-[40px] shadow-sm hover:shadow-xl transition-all" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-[#D4FF00] mb-4 text-4xl">💬</div>
+                    <h3 class="text-xl font-bold mb-3">Chatbot Support</h3>
+                    <p class="text-sm text-gray-500">24/7 rule-based assistant for quick farming queries.</p>
+                </div>
+                <div class="bg-white p-10 rounded-[40px] shadow-sm hover:shadow-xl transition-all" data-aos="fade-up">
+                    <div class="text-[#D4FF00] mb-4 text-4xl">🛒</div>
+                    <h3 class="text-xl font-bold mb-3">E-Shop</h3>
+                    <p class="text-sm text-gray-500">Access to modern tools and equipment for small-scale farms.</p>
+                </div>
+                <div class="bg-white p-10 rounded-[40px] shadow-sm hover:shadow-xl transition-all" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-[#D4FF00] mb-4 text-4xl">💰</div>
+                    <h3 class="text-xl font-bold mb-3">Waste-to-Wealth</h3>
+                    <p class="text-sm text-gray-500">Monetize stubble and organic waste through our network.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="showcase" class="py-24 bg-white px-8">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-5xl brand-font text-[#1A3C34]">Project Demo</h2>
+            </div>
+            <div class="relative group rounded-[50px] overflow-hidden bg-[#1A3C34] shadow-2xl">
+                <video id="projectVideo" class="w-full aspect-video object-cover opacity-60">
+                    <source src="videos/demo.mp4" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <button onclick="toggleVideo()" id="playBtn" class="w-20 h-20 bg-[#D4FF00] rounded-full flex items-center justify-center hover:scale-110 transition">
+                        <svg class="w-8 h-8 text-[#1A3C34]" fill="currentColor" viewBox="0 0 20 20"><path d="M4.5 3.5v13l11-6.5-11-6.5z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="reviews" class="py-24 bg-[#F9F8F4] px-8 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-5xl brand-font text-[#1A3C34] mb-12">Farmer Stories</h2>
+            <div class="carousel-container">
+                <div class="carousel-item bg-[#1A3C34] text-white p-8 rounded-[40px]">
+                    <p class="italic opacity-70 mb-6">"The pest AI is a lifesaver. I identified my tomato blight in seconds."</p>
+                    <p class="font-bold text-[#D4FF00]">Farmer Rajesh</p>
+                </div>
+                <div class="carousel-item bg-white p-8 rounded-[40px] shadow-sm">
+                    <p class="italic text-gray-500 mb-6">"Selling my stubble was so easy. KrishiMitra is a blessing."</p>
+                    <p class="font-bold text-[#1A3C34]">Farmer Sanya</p>
+                </div>
+                <div class="carousel-item bg-[#1A3C34] text-white p-8 rounded-[40px]">
+                    <p class="italic opacity-70 mb-6">"The weather alerts helped me plan my irrigation perfectly."</p>
+                    <p class="font-bold text-[#D4FF00]">Farmer Amit</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="map-section" class="py-24 px-8 bg-white">
+        <div id="map" class="max-w-7xl mx-auto shadow-2xl border-[16px] border-white"></div>
+    </section>
+
+    <footer class="py-12 text-center text-gray-400 text-[10px] tracking-[0.4em] uppercase">
+        &copy; 2026 KRISHIMITRA PROJECT | CLASS VIII
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 1000, once: true });
+
+        // Video Control
+        function toggleVideo() {
+            const v = document.getElementById('projectVideo');
+            const b = document.getElementById('playBtn');
+            if(v.paused) { v.play(); b.style.opacity = '0'; }
+            else { v.pause(); b.style.opacity = '1'; }
+        }
+
+        // Animated Circles Logic
+        window.addEventListener('scroll', () => {
+            const section = document.getElementById('insights');
+            const pos = section.getBoundingClientRect().top;
+            if(pos < window.innerHeight - 100) {
+                document.getElementById('circle1').style.strokeDashoffset = "25"; // 92%
+                document.getElementById('circle2').style.strokeDashoffset = "38"; // 88%
+                document.getElementById('circle3').style.strokeDashoffset = "78"; // 75%
+                document.getElementById('circle4').style.strokeDashoffset = "6";  // 98%
+            }
+        });
+
+        // Map
+        var map = L.map('map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+        L.circle([28.6139, 77.2090], { color: '#D4FF00', radius: 50000 }).addTo(map).bindPopup('Delhi Hub');
+    </script>
+</body>
+</html>
